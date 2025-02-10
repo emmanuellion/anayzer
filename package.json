@@ -5,8 +5,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "github",
+    "repos",
+    "repositories",
+    "sort",
+    "stars"
+  ],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "homepage": "https://github.com/emmanuellion/anayzer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmanuellion/anayzer.git"
+  }
 }
