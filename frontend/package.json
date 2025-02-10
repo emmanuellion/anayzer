@@ -1,0 +1,14 @@
+{
+  "name": "frontend",
+  "version": "1.0.4",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx anayzer"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "anayzer": "^1.0.8"
+  }
+}
