@@ -1,8 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { exec, spawn } from 'child_process';
+import {exec, spawn} from 'child_process';
 import util from 'util';
-import { ESLint } from 'eslint';
+import {ESLint} from 'eslint';
+import os from 'node:os';
 
 const execPromise = util.promisify(exec);
 
@@ -26,9 +27,9 @@ export interface ProjectMetrics {
     npmAuditResults: any;
     lint: any;
     startupTime: number;
-    ressources: any;
     buildTime: number;
     dependencies: any;
+    sys: any;
 }
 
 async function getAllSourceFiles(dir: string): Promise<string[]> {
@@ -170,19 +171,12 @@ async function measureStartupTime(command: string): Promise<number> {
             reject(err);
         });
 
-        child.on('exit', (_) => {
+        child.on('exit', () => {
             const elapsed = Date.now() - startTime;
             child.kill();
             resolve(elapsed);
         });
     });
-}
-
-function measureResourceUsage(): { memory: NodeJS.MemoryUsage; cpu: NodeJS.CpuUsage } {
-    return {
-        memory: process.memoryUsage(),
-        cpu: process.cpuUsage(),
-    };
 }
 
 async function measureBuildTime(): Promise<number> {
@@ -196,27 +190,18 @@ async function measureBuildTime(): Promise<number> {
 }
 
 async function getFolderSize(folderPath: string): Promise<number> {
-    let totalSize = 0;
-    try {
-        const files = await fs.readdir(folderPath, { withFileTypes: true });
-
-        const sizes = await Promise.all(
-            files.map(async (file) => {
-                const filePath = path.join(folderPath, file.name);
-                if (file.isDirectory()) {
-                    return await getFolderSize(filePath);
-                } else {
-                    const stats = await fs.stat(filePath);
-                    return stats.size;
-                }
-            })
-        );
-
-        totalSize = sizes.reduce((sum, size) => sum + size, 0);
-    } catch (error) {
-        throw error;
-    }
-    return totalSize;
+    const files = await fs.readdir(folderPath, { withFileTypes: true });
+    const sizes = await Promise.all(files.map(async (file) => {
+        const filePath = path.join(folderPath, file.name);
+        if (file.isDirectory()) {
+            return await getFolderSize(filePath);
+        } else {
+            const stats = await fs.stat(filePath);
+            return stats.size;
+        }
+    })
+    );
+    return sizes.reduce((sum, size) => sum + size, 0);
 }
 
 async function getLatestVersion(pkg: string) {
@@ -234,13 +219,13 @@ async function analyzePackages() {
 
     try {
         await fs.stat(nodeModulesPath);
-    } catch (err) {
+    } catch (_) {
         throw new Error("No node_modules found!");
     }
 
     try {
         await fs.stat(packageJsonPath);
-    } catch (err) {
+    } catch (_) {
         throw new Error("No package.json found!");
     }
 
@@ -261,12 +246,12 @@ async function analyzePackages() {
                 const latestVersion = await getLatestVersion(pkg);
                 const outdated = latestVersion && installedVersion.replace('^', '') !== latestVersion;
                 packageData.push({ name: pkg, size, installedVersion, latestVersion, outdated });
-            } catch (err) { }
+            } catch (_) { /* empty */ }
         }
 
         packageData.sort((a, b) => b.size - a.size);
         return packageData;
-    } catch (error) {
+    } catch (_) {
         throw new Error("Erreur lors de la lecture des dépendances du package.json ou du dossier node_modules:");
     }
 }
@@ -297,8 +282,6 @@ export default async function analyzeProject(spinner: any, command: string): Pro
     const lint = await analyzeLinting(base);
     spinner.text = "Measuring startup time";
     const startupTime = await measureStartupTime(command);
-    spinner.text = "Looking for the recoussource usage";
-    const ressources = measureResourceUsage();
     spinner.text = "Measuring build time";
     const buildTime = await measureBuildTime();
     spinner.text = "Analyzing packages";
@@ -316,8 +299,15 @@ export default async function analyzeProject(spinner: any, command: string): Pro
         npmAuditResults,
         lint,
         startupTime,
-        ressources,
         buildTime,
-        dependencies
+        dependencies,
+        sys: {
+            arch: os.arch(),
+            cpus: os.cpus(),
+            hostname: os.hostname(),
+            system: os.machine(),
+            platform: os.platform(),
+            type: os.type()
+        }
     };
 }

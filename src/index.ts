@@ -6,6 +6,9 @@ import path from 'path';
 import express from 'express';
 import {select} from '@inquirer/prompts';
 import cors from 'cors';
+import expressWs from 'express-ws';
+import os from "os-utils";
+import { WebSocket } from 'ws';
 
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 if(!fs.existsSync(packageJsonPath)){
@@ -13,14 +16,25 @@ if(!fs.existsSync(packageJsonPath)){
 }
 
 let data: null | ProjectMetrics = null;
-
-const app = express();
+const app = express() as unknown as expressWs.Application;
+expressWs(app);
 const port = 2002;
 
 app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.get('/data', async (_, res) => {
 	res.send({data});
+});
+
+app.ws('/websocket', (ws: WebSocket) => {
+	setInterval(() => {
+		os.cpuUsage((v: number) => {
+			ws.send(JSON.stringify({
+				cpuUsage: Math.ceil(v*100),
+				memoryUsage: ((1-parseFloat(os.freememPercentage().toFixed(2)))*(os.totalmem() / 1024)).toFixed(1)
+			}));
+		});
+	}, 2000)
 });
 
 (async() => {
