@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { exec } = require('child_process');
+import fs from 'fs';
+import { exec } from 'child_process';
 
 const filePackagePath = './package.json';
 const filePackageTest = "./frontend/package.json";

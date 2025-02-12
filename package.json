@@ -1,20 +1,23 @@
 {
   "name": "anayzer",
-  "version": "1.0.8",
-  "main": "index.js",
+  "version": "1.0.9",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node upgrade.js"
+    "dev": "node --import ./src/register-tsnode-loader.js ./src/index.ts",
+    "upgrade": "node upgrade.js",
+    "build": "tsc",
+    "lint": "eslint src/",
+    "fix": "eslint --fix src/"
   },
   "keywords": [
-    "github",
-    "repos",
-    "repositories",
-    "sort",
-    "stars"
+    "analyze",
+    "packages",
+    "project",
+    "monitoring",
+    "metrics"
   ],
-  "author": "",
+  "author": "Mabule",
   "license": "ISC",
   "description": "",
   "homepage": "https://github.com/emmanuellion/anayzer",
@@ -23,13 +26,26 @@
     "url": "git+https://github.com/emmanuellion/anayzer.git"
   },
   "bin": {
-    "anayzer": "./index.js"
+    "anayzer": "dist/index.js"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.3.1",
     "chalk": "^5.4.1",
     "chartjs-node-canvas": "^4.1.6",
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
-    "ora": "^5.4.1"
+    "yocto-spinner": "^0.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
+    "globals": "^15.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0"
   }
 }
