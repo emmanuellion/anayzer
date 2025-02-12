@@ -32,12 +32,14 @@
     "@inquirer/prompts": "^7.3.1",
     "chalk": "^5.4.1",
     "chartjs-node-canvas": "^4.1.6",
+    "cors": "^2.8.5",
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
     "yocto-spinner": "^0.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.1",
     "@typescript-eslint/eslint-plugin": "^8.24.0",

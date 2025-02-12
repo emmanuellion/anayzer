@@ -301,7 +301,7 @@ export default async function analyzeProject(spinner: any, command: string): Pro
     const ressources = measureResourceUsage();
     spinner.text = "Measuring build time";
     const buildTime = await measureBuildTime();
-    spinner.text = "Analyzing";
+    spinner.text = "Analyzing packages";
     const dependencies = await analyzePackages();
 
     return {
