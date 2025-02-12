@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import {select} from '@inquirer/prompts';
+import cors from 'cors';
 
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 if(!fs.existsSync(packageJsonPath)){
@@ -41,7 +42,9 @@ let data: null | ProjectMetrics = null;
 
 const app = express();
 const port = 2002;
-const START_SERVER = false;
+const START_SERVER = true;
+
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 app.get('/data', async (_, res) => {
 	res.send({data});
