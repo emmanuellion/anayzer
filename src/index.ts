@@ -14,6 +14,15 @@ if(!fs.existsSync(packageJsonPath)){
 
 let data: null | ProjectMetrics = null;
 
+const app = express();
+const port = 2002;
+
+app.use(cors({ origin: 'http://localhost:3000' }));
+
+app.get('/data', async (_, res) => {
+	res.send({data});
+});
+
 (async() => {
 	const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf-8'));
 	const answer = await select({
@@ -31,26 +40,11 @@ let data: null | ProjectMetrics = null;
 	try {
 		data = await analyzeProject(spinner, answer);
 		spinner.success("Success");
+		app.listen(port, () => {
+			console.log(`Serveur en ligne sur http://localhost:${port}`);
+		});
 	} catch(error) {
 		spinner.error("An error occurred");
 		console.log(chalk.red(error));
 	}
 })()
-
-
-
-
-const app = express();
-const port = 2002;
-const START_SERVER = true;
-
-app.use(cors({ origin: 'http://localhost:3000' }));
-
-app.get('/data', async (_, res) => {
-	res.send({data});
-});
-
-if(START_SERVER)
-	app.listen(port, () => {
-	console.log(`Serveur en ligne sur http://localhost:${port}`);
-});
