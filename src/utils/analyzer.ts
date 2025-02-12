@@ -14,7 +14,7 @@ interface FileMetrics {
     asyncCount: number;
 }
 
-interface ProjectMetrics {
+export interface ProjectMetrics {
     totalFiles: number;
     totalLines: number;
     averageComplexity: string;
@@ -28,6 +28,7 @@ interface ProjectMetrics {
     startupTime: number;
     ressources: any;
     buildTime: number;
+    dependencies: any;
 }
 
 async function getAllSourceFiles(dir: string): Promise<string[]> {
@@ -123,7 +124,7 @@ async function analyzeDuplication(files: string[]): Promise<{ duplicateLines: nu
     return { duplicateLines, totalLines, duplicationPercentage };
 }
 
-async function analyzeDependencies(): Promise<number> {
+async function countDependencies(): Promise<number> {
     try {
         const packageJsonContent = await fs.readFile('package.json', 'utf-8');
         const packageJson = JSON.parse(packageJsonContent);
@@ -160,16 +161,16 @@ async function analyzeLinting(base: string): Promise<{ totalErrors: number; tota
     return { totalErrors, totalWarnings, results };
 }
 
-async function measureStartupTime(command: string, args: string[] = [], waitTime: number = 3000): Promise<number> {
+async function measureStartupTime(command: string): Promise<number> {
     return new Promise<number>((resolve, reject) => {
         const startTime = Date.now();
-        const child = spawn(command, args, { shell: true });
+        const child = spawn(command, [], { shell: true });
 
         child.on('error', (err) => {
             reject(err);
         });
 
-        child.on('exit', (code) => {
+        child.on('exit', (_) => {
             const elapsed = Date.now() - startTime;
             child.kill();
             resolve(elapsed);
@@ -194,6 +195,82 @@ async function measureBuildTime(): Promise<number> {
     return Date.now() - startTime;
 }
 
+async function getFolderSize(folderPath: string): Promise<number> {
+    let totalSize = 0;
+    try {
+        const files = await fs.readdir(folderPath, { withFileTypes: true });
+
+        const sizes = await Promise.all(
+            files.map(async (file) => {
+                const filePath = path.join(folderPath, file.name);
+                if (file.isDirectory()) {
+                    return await getFolderSize(filePath);
+                } else {
+                    const stats = await fs.stat(filePath);
+                    return stats.size;
+                }
+            })
+        );
+
+        totalSize = sizes.reduce((sum, size) => sum + size, 0);
+    } catch (error) {
+        throw error;
+    }
+    return totalSize;
+}
+
+async function getLatestVersion(pkg: string) {
+    return new Promise((resolve) => {
+        exec(`npm view ${pkg} version`, (err, stdout) => {
+            if (err) return resolve(null);
+            resolve(stdout.trim());
+        });
+    });
+}
+
+async function analyzePackages() {
+    const nodeModulesPath = path.join(process.cwd(), 'node_modules');
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+
+    try {
+        await fs.stat(nodeModulesPath);
+    } catch (err) {
+        throw new Error("No node_modules found!");
+    }
+
+    try {
+        await fs.stat(packageJsonPath);
+    } catch (err) {
+        throw new Error("No package.json found!");
+    }
+
+    try {
+        const packageJsonContent = await fs.readFile(packageJsonPath, 'utf-8');
+        const packageJson = JSON.parse(packageJsonContent);
+
+        const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+        const packageData = [];
+
+        for (const pkg of Object.keys(dependencies)) {
+            const pkgPath = path.join(nodeModulesPath, pkg);
+            try {
+                await fs.stat(pkgPath);
+
+                const size = await getFolderSize(pkgPath) as number;
+                const installedVersion = dependencies[pkg];
+                const latestVersion = await getLatestVersion(pkg);
+                const outdated = latestVersion && installedVersion.replace('^', '') !== latestVersion;
+                packageData.push({ name: pkg, size, installedVersion, latestVersion, outdated });
+            } catch (err) { }
+        }
+
+        packageData.sort((a, b) => b.size - a.size);
+        return packageData;
+    } catch (error) {
+        throw new Error("Erreur lors de la lecture des dépendances du package.json ou du dossier node_modules:");
+    }
+}
+
 export default async function analyzeProject(spinner: any, command: string): Promise<ProjectMetrics> {
     const base = path.join(process.cwd(), 'src');
     spinner.text = "Reading source files";
@@ -213,10 +290,9 @@ export default async function analyzeProject(spinner: any, command: string): Pro
     spinner.text = "Analyzing duplication";
     const duplication = await analyzeDuplication(files);
     spinner.text = "Analyzing dependencies";
-    const dependenciesCount = await analyzeDependencies();
+    const dependenciesCount = await countDependencies();
     spinner.text = "npm audit";
     const npmAuditResults = await runNpmAudit();
-
     spinner.text = "Retrieving linting data";
     const lint = await analyzeLinting(base);
     spinner.text = "Measuring startup time";
@@ -225,6 +301,8 @@ export default async function analyzeProject(spinner: any, command: string): Pro
     const ressources = measureResourceUsage();
     spinner.text = "Measuring build time";
     const buildTime = await measureBuildTime();
+    spinner.text = "Analyzing";
+    const dependencies = await analyzePackages();
 
     return {
         totalFiles,
@@ -239,6 +317,7 @@ export default async function analyzeProject(spinner: any, command: string): Pro
         lint,
         startupTime,
         ressources,
-        buildTime
+        buildTime,
+        dependencies
     };
 }
