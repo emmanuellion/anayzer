@@ -13,12 +13,12 @@ interface ProjectMetrics {
     totalAsyncCount: number;
     duplicatePercentage: string;
     dependenciesCount: number;
-    npmAuditResults: any;
-    lint: any;
+    npmAuditResults: never;
+    lint: never;
     startupTime: number;
-    ressources: any;
+    ressources: never;
     buildTime: number;
-    dependencies: any;
+    dependencies: never;
 }
 
 export interface NumberData {
@@ -48,8 +48,7 @@ export default function Page() {
                             },
                             {
                                 text: "Average complexity : ",
-                                value: parseFloat(data.data.averageComplexity),
-                                suffix: "between 1 & 10 = good, 11 & 20 = ok, ..."
+                                value: parseFloat(data.data.averageComplexity)
                             },
                             {
                                 text: "Startup time : ",
@@ -62,9 +61,12 @@ export default function Page() {
                             },
                             {
                                 text: "Total number of totalFiles : ",
-                                value: data.data.totalLines
+                                value: data.data.totalFiles
                             },
-
+                            {
+                                text: "Number of async function : ",
+                                value: data.data.totalAsyncCount
+                            },
                         ]);
                         console.log([
                             {
@@ -93,7 +95,7 @@ export default function Page() {
                     }))
                 .catch(err => console.log(err));
         }
-    }, []);
+    }, [data]);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black/25 p-4">
@@ -101,7 +103,7 @@ export default function Page() {
             data ? (
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                        {infos.length > 0 && <Card title={"Some data"} description={"Some data"} data={infos} footer={"footer"} />}
+                        {infos.length > 0 && <Card title={"Some data"} description={"Some data"} data={infos} footer={"complexity between 1 & 10 = good, 11 & 20 = ok, 21 & 50 = complex, 51 & ∞ = too complex"} />}
                         {/*<Card />*/}
                         {/*<Card />*/}
                     </div>
