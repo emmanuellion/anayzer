@@ -9,6 +9,7 @@
     "noEmit": true,
     "strict": true,
     "sourceMap": true,
+    "lib": ["ES2020"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
