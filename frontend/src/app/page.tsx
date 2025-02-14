@@ -1,101 +1,177 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import Card from "@/components/Card/Card";
+import {useEffect, useState} from "react";
+import Loader from "@/components/Loader/Loader";
+import ChartCpu from "@/components/ChartCpu/ChartCpu";
+import ChartMem from "@/components/ChartMem/ChartMem";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+
+interface ProjectMetrics {
+    totalFiles: number;
+    totalLines: number;
+    averageComplexity: string;
+    totalCommentLines: number;
+    documentationCoverage: string;
+    totalAsyncCount: number;
+    duplicatePercentage: string;
+    dependenciesCount: number;
+    npmAuditResults: any;
+    lint: any;
+    startupTime: number;
+    buildTime: number;
+    dependencies: any;
+    sys: any;
+}
+
+export interface NumberData {
+    text: string;
+    value: number;
+    suffix?: string;
+}
+
+export default function Page() {
+    const [data, setData] = useState<null | ProjectMetrics>(null);
+    const [infos, setInfos] = useState<NumberData[]>([]);
+
+    useEffect(() => {
+        if(!data){
+            fetch('http://localhost:2002/data')
+                .then(res => res.json()
+                    .then(data => {
+                        setInfos([
+                            {
+                                text: "Number of dependencies : ",
+                                value: data.data.dependenciesCount
+                            },
+                            {
+                                text: "Build time : ",
+                                value: data.data.buildTime,
+                                suffix: "ms"
+                            },
+                            {
+                                text: "Average complexity : ",
+                                value: parseFloat(data.data.averageComplexity)
+                            },
+                            {
+                                text: "Startup time : ",
+                                value: data.data.startupTime,
+                                suffix: "ms"
+                            },
+                            {
+                                text: "Total number of lines : ",
+                                value: data.data.totalLines
+                            },
+                            {
+                                text: "Total number of totalFiles : ",
+                                value: data.data.totalFiles
+                            },
+                            {
+                                text: "Number of async function : ",
+                                value: data.data.totalAsyncCount
+                            },
+                        ]);
+                        setData(data.data);
+                    }))
+                .catch(err => console.log(err));
+        }
+    }, [data]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className={"w-screen h-screen overflow-x-hidden bg-black/25 p-4"}>
+        {
+            data ? (
+                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+                        {infos.length > 0 && <Card
+                            title={"Some data"}
+                            description={"Here are some numbers about your project"}
+                            data={infos}
+                            className={"h-full"}
+                            footer={<p>complexity between : <br/> [ 1 ; 10 ] = good <br/> [ 11 ; 20 ] = ok <br/> [ 21 ; 50 ] = complex <br/> [ 51 ; ∞ [ = too complex</p>} />}
+                        <Card
+                            className={"h-full"}
+                            title={"Cpu usage"}
+                            description={"Measuring in real time your cpu usage"}
+                            content={<ChartCpu webSocket={"ws://localhost:2002/websocket"}/>} />
+                        <Card
+                            className={"h-full"}
+                            title={"Memory usage"}
+                            description={"Measuring in real time your memory usage"}
+                            content={<ChartMem webSocket={"ws://localhost:2002/websocket"}/>} />
+                        <Card
+                            className={"h-full"}
+                            title={"System data"}
+                            description={"Here are few informations that you should already know ..."}
+                            content={<div className={"grid grid-cols-3 gap-4"}>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>Hostname</label>
+                                    <p>{data.sys.hostname}</p>
+                                </div>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>Architecture</label>
+                                    <p>{data.sys.arch}</p>
+                                </div>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>Platforme</label>
+                                    <p>{data.sys.platform}</p>
+                                </div>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>System</label>
+                                    <p>{data.sys.system}</p>
+                                </div>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>Type</label>
+                                    <p>{data.sys.type}</p>
+                                </div>
+                                <div className={"flex flex-col gap-2 w-full h-full"}>
+                                    <label className={"font-[700] underline"}>Model</label>
+                                    <p>{data.sys.cpus[0].model}</p>
+                                </div>
+                            </div>} />
+                    </div>
+                    <Card
+                        className={"w-full aspect-auto"}
+                        title={"Lint result"}
+                        description={""}
+                        content={
+                            <Table>
+                                <TableCaption>List of all messages</TableCaption>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">Severity</TableHead>
+                                        <TableHead>Message</TableHead>
+                                        <TableHead>Rule</TableHead>
+                                        <TableHead className="text-right">File</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {
+                                        data.lint.results.map((file: any, index: number) => {
+                                            return file.messages.length > 0 ? (
+                                                file.messages.map((message: any, ind: number) => {return <TableRow className={message.severity === 2 ? "bg-red-500/20" : message.severity === 1 ? "bg-orange-500/20" : "bg-green-500/20"} key={`${index}${ind}`}>
+                                                <TableCell className="font-medium">{message.severity}</TableCell>
+                                                <TableCell>{message.message}</TableCell>
+                                                <TableCell>{message.ruleId}</TableCell>
+                                                <TableCell className="text-right">{file.filePath}</TableCell>
+                                            </TableRow>})) : null;
+                                        })
+                                    }
+                                </TableBody>
+                            </Table>
+                        } />
+                    {/*<div className="min-h-[30vh] flex-1 rounded-xl bg-muted/50"></div>*/}
+                </div>
+            ) : <Loader />
+        }
     </div>
   );
 }

@@ -4,6 +4,8 @@ import {exec, spawn} from 'child_process';
 import util from 'util';
 import {ESLint} from 'eslint';
 import os from 'node:os';
+import chalk from "chalk";
+import yoctoSpinner from "yocto-spinner";
 
 const execPromise = util.promisify(exec);
 
@@ -41,7 +43,7 @@ async function getAllSourceFiles(dir: string): Promise<string[]> {
         if (stat.isDirectory()) {
             const nestedFiles = await getAllSourceFiles(filePath);
             results = results.concat(nestedFiles);
-        } else if (file.endsWith('.js') || file.endsWith('.ts')) {
+        } else if (file.endsWith('.js') || file.endsWith('.ts') || file.endsWith('.jsx') || file.endsWith('.tsx')) {
             results.push(filePath);
         }
     }
@@ -150,7 +152,7 @@ async function runNpmAudit(): Promise<any> {
 
 async function analyzeLinting(base: string): Promise<{ totalErrors: number; totalWarnings: number; results: any[] }> {
     const eslint = new ESLint();
-    const results = await eslint.lintFiles([base+"/**/*.{js,ts,tsx,jsx}"]);
+    const results = await eslint.lintFiles(base+"/**/*.{js,ts,tsx,jsx}");
 
     let totalErrors = 0;
     let totalWarnings = 0;
@@ -256,11 +258,35 @@ async function analyzePackages() {
     }
 }
 
-export default async function analyzeProject(spinner: any, command: string): Promise<ProjectMetrics> {
+function startStep(text: string){
+    const spinner = yoctoSpinner({
+        text: text,
+        color: "magenta",
+        spinner: {
+            "interval": 80,
+            "frames": [
+                "⠋",
+                "⠙",
+                "⠹",
+                "⠸",
+                "⠼",
+                "⠴",
+                "⠦",
+                "⠧",
+                "⠇",
+                "⠏"
+            ]
+        }
+    }).start();
+    return spinner;
+}
+
+export default async function analyzeProject(command: string | null): Promise<ProjectMetrics> {
     const base = path.join(process.cwd(), 'src');
-    spinner.text = "Reading source files";
+    let spinner = startStep("Reading source files");
     const files = await getAllSourceFiles(base);
-    spinner.text = "Getting metrics from source files";
+    spinner.success();
+    spinner = startStep("Getting metrics from source files");
     const fileMetricsArray = await Promise.all(files.map(analyzeFile));
 
     const totalFiles = fileMetricsArray.length;
@@ -271,21 +297,32 @@ export default async function analyzeProject(spinner: any, command: string): Pro
 
     const averageComplexity = totalFiles > 0 ? totalComplexity / totalFiles : 0;
     const documentationCoverage = totalLines > 0 ? (totalCommentLines / totalLines) * 100 : 0;
+    spinner.success();
 
-    spinner.text = "Analyzing duplication";
+    spinner = startStep("Analyzing duplication");
     const duplication = await analyzeDuplication(files);
-    spinner.text = "Analyzing dependencies";
+    spinner.success();
+    spinner = startStep("Analyzing dependencies");
     const dependenciesCount = await countDependencies();
-    spinner.text = "npm audit";
+    spinner.success();
+    spinner = startStep("npm audit");
     const npmAuditResults = await runNpmAudit();
-    spinner.text = "Retrieving linting data";
+    spinner.success();
+    spinner = startStep("Retrieving linting data");
     const lint = await analyzeLinting(base);
-    spinner.text = "Measuring startup time";
-    const startupTime = await measureStartupTime(command);
-    spinner.text = "Measuring build time";
-    const buildTime = await measureBuildTime();
-    spinner.text = "Analyzing packages";
+    spinner.success();
+    let startupTime = 0, buildTime = 0;
+    if(command){
+        spinner = startStep("Measuring startup time");
+        startupTime = await measureStartupTime(command);
+        spinner.success();
+        spinner = startStep("Measuring build time");
+        buildTime = await measureBuildTime();
+        spinner.success();
+    }
+    spinner = startStep("Analyzing packages");
     const dependencies = await analyzePackages();
+    spinner.success();
 
     return {
         totalFiles,
