@@ -30,11 +30,11 @@ app.ws('/websocket', (ws: WebSocket) => {
 	setInterval(() => {
 		os.cpuUsage((v: number) => {
 			ws.send(JSON.stringify({
-				cpuUsage: Math.ceil(v*100),
+				cpuUsage: (v*100).toFixed(1),
 				memoryUsage: ((1-parseFloat(os.freememPercentage().toFixed(2)))*(os.totalmem() / 1024)).toFixed(1)
 			}));
 		});
-	}, 2000)
+	}, 100)
 });
 
 (async() => {
@@ -50,6 +50,21 @@ app.ws('/websocket', (ws: WebSocket) => {
 	const spinner = yoctoSpinner({
 		text: "Beginning analyze ...",
 		color: "magenta",
+		spinner: {
+			"interval": 80,
+			"frames": [
+				"⠋",
+				"⠙",
+				"⠹",
+				"⠸",
+				"⠼",
+				"⠴",
+				"⠦",
+				"⠧",
+				"⠇",
+				"⠏"
+			]
+		}
 	}).start();
 	try {
 		data = await analyzeProject(spinner, answer);
