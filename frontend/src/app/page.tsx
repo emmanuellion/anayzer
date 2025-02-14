@@ -14,7 +14,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import s from './page.module.css';
 
 interface ProjectMetrics {
     totalFiles: number;
@@ -87,7 +86,7 @@ export default function Page() {
     }, [data]);
 
   return (
-    <div className={"w-screen h-screen overflow-x-hidden bg-black/25 p-4 "+s.scroll}>
+    <div className={"w-screen h-screen overflow-x-hidden bg-black/25 p-4"}>
         {
             data ? (
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
