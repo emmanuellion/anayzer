@@ -2,7 +2,7 @@
 
 <img src="example.png" alt="Example"/>
 
-**Anayzer** est un outil en ligne de commande (CLI) qui analyse rapidement votre projet JavaScript/TypeScript et vous fournit diverses métriques ainsi que des informations sur la complexité, les dépendances et l’utilisation des ressources. Il peut également vous aider à repérer des problèmes de lint et à obtenir un aperçu global de la santé de votre code.
+**Anayzer** is a command-line tool (CLI) that quickly analyzes your JavaScript/TypeScript project and provides you with various metrics as well as information on complexity, dependencies and resource usage. It can also help you spot lint problems and get an overall picture of your code's health.
 
 ---
 
@@ -14,9 +14,9 @@ npm i anayzer
 
 ---
 
-## Utilisation
+## Use
 
-Une fois le package installé, vous pouvez lancer l’analyse de votre projet à l’aide de :
+Once the package has been installed, you can launch the analysis of your project using :
 
 ```bash
 npx anayzer
@@ -24,53 +24,52 @@ npx anayzer
 
 ---
 
-## Fonctionnalités
+## Features
 
-Anayzer fournit différents types d’informations et de rapports :
+Anayzer provides different types of information and reports:
 
-1. **Statistiques générales**
-   - **Nombre de dépendances** : le nombre de packages listés dans vos fichiers `package.json`.
-   - **Build time** : le temps de construction (ou d’analyse) du projet.
-   - **Nombre total de lignes** : les lignes de code (LOC) comptabilisées dans votre projet.
-   - **Starting time** : le temps nécessaire pour initialiser le projet ou l’outil.
-   - **Nombre total de handles** : le nombre de ressources ou de « handles » (descripteurs de fichiers, sockets, etc.) ouverts.
-   - **Nombre de fonctions asynchrones** : recense les fonctions `async`/`await` dans le code.
-   - **Complexity index** : un indicateur global de la complexité de votre projet (nombre de classes, de fonctions, etc.).
+1. **General statistics
+   - Number of dependencies**: the number of packages listed in your `package.json` files.
+   - Build time**: the project build (or analysis) time.
+   - Total number of lines**: lines of code (LOC) counted in your project.
+   - **Starting time**: time needed to initialize the project or tool.
+   - Total number of handles**: the number of resources or handles (file descriptors, sockets, etc.) opened.
+   - Number of asynchronous functions**: lists `async`/`await` functions in the code.
+   - Complexity index**: an overall indicator of your project's complexity (number of classes, functions, etc.).
 
-2. **Ressources système**
-   - **CPU usage** : mesure l’utilisation du processeur pendant l’analyse.
-   - **Memory usage** : mesure la mémoire utilisée par l’outil pendant l’exécution.
-   - **Informations sur la machine** : hôte, architecture, plateforme, version de Node.js, etc.
+2. **System resources
+   - CPU usage**: measures CPU usage during analysis.
+   - Memory usage**: measures memory used by the tool during execution.
+   - Machine information**: host, architecture, platform, Node.js version, etc.
 
-3. **Rapport de lint**
-   - Anayzer peut lister les éventuelles erreurs ou avertissements de lint dans votre code (par exemple, règles ESLint).
-   - Chaque message indique la gravité (erreur ou avertissement), la description et la règle concernée.
+3. **lint report**
+   - Anayzer can list any lint errors or warnings in your code (e.g. ESLint rules).
+   - Each message indicates the severity (error or warning), the description and the rule concerned.
 
-4. **Visualisation**
-   - Le résultat est présenté sous forme de tableau et de graphiques (dans la console ou via une interface simplifiée) pour vous aider à repérer rapidement les zones problématiques.
+4. **Visualization
+   - The result is presented in tabular and graphical form (in the console or via a simplified interface) to help you quickly spot problem areas.
 
-Voici un aperçu d’une interface d’exemple (simplifiée) :
-
----
-
-## Exemples d’utilisation
-
-- **Analyse rapide** : pour avoir un aperçu global de l’état de votre projet avant de le pousser en production.
-- **Intégration CI/CD** : vous pouvez exécuter `npx anayzer` dans vos pipelines pour repérer rapidement les problèmes de lint, vérifier le nombre de dépendances, etc.
-- **Audit de performance** : identifiez si votre projet consomme trop de ressources (CPU ou mémoire) lors du build ou du démarrage.
+Here's an example interface (simplified):
 
 ---
 
-## Contribuer
+## Examples of use
 
-Les contributions sont les bienvenues ! Si vous souhaitez ajouter des fonctionnalités, corriger des bugs ou améliorer la documentation, n’hésitez pas à ouvrir une **issue** ou une **pull request** dans le dépôt GitHub correspondant.
-
----
-
-## Licence
-
-Anayzer est distribué sous licence [MIT](LICENSE). Vous êtes libre de l’utiliser, de le modifier et de le redistribuer.
+- Quick analysis**: get an overview of your project's status before pushing it into production.
+- CI/CD integration**: you can run `npx anayzer` in your pipelines to quickly spot lint problems, check the number of dependencies, etc.
+- Performance audit**: identify if your project is consuming too many resources (CPU or memory) during build or startup.
 
 ---
 
-**Bon usage et bonne analyse de vos projets !**
+## Contribute
+
+Contributions are welcome! If you'd like to add features, fix bugs or improve documentation, feel free to open a **issue** or **pull request** in the corresponding GitHub repository.
+---
+
+## License
+
+Anayzer is distributed under the [MIT](LICENSE) license. You are free to use, modify and redistribute it.
+
+---
+
+**Good use and good analysis of your projects!
