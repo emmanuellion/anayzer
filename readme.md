@@ -1,5 +1,7 @@
 # Anayzer
 
+[link to npm package](https://www.npmjs.com/package/anayzer)
+
 <img src="example.png" alt="Example"/>
 
 **Anayzer** is a command-line tool (CLI) that quickly analyzes your JavaScript/TypeScript project and provides you with various metrics as well as information on complexity, dependencies and resource usage. It can also help you spot lint problems and get an overall picture of your code's health.
