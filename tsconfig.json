@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
+    "types": ["jest"],
     "strict": true,
     "sourceMap": true,
     "esModuleInterop": true,

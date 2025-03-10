@@ -1,10 +1,9 @@
-import fs from 'fs/promises';
-import path from 'path';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import {exec, spawn} from 'child_process';
-import util from 'util';
+import * as util from 'util';
 import {ESLint} from 'eslint';
-import os from 'node:os';
-import chalk from "chalk";
+import * as os from 'node:os';
 import yoctoSpinner from "yocto-spinner";
 
 const execPromise = util.promisify(exec);
@@ -34,7 +33,7 @@ export interface ProjectMetrics {
     sys: any;
 }
 
-async function getAllSourceFiles(dir: string): Promise<string[]> {
+export async function getAllSourceFiles(dir: string): Promise<string[]> {
     let results: string[] = [];
     const list = await fs.readdir(dir);
     for (const file of list) {
@@ -50,7 +49,7 @@ async function getAllSourceFiles(dir: string): Promise<string[]> {
     return results;
 }
 
-async function analyzeFile(filePath: string): Promise<FileMetrics> {
+export async function analyzeFile(filePath: string): Promise<FileMetrics> {
     const content = await fs.readFile(filePath, 'utf-8');
     const linesArray = content.split(/\r?\n/);
     const totalLines = linesArray.length;
@@ -102,13 +101,13 @@ async function analyzeFile(filePath: string): Promise<FileMetrics> {
     };
 }
 
-async function analyzeDuplication(files: string[]): Promise<{ duplicateLines: number; totalLines: number; duplicationPercentage: number }> {
+export async function analyzeDuplication(files: string[]): Promise<{ duplicateLines: number; totalLines: number; duplicationPercentage: number }> {
     const lineCounts = new Map<string, number>();
     let totalLines = 0;
 
     for (const filePath of files) {
         const content = await fs.readFile(filePath, 'utf-8');
-        const lines = content.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
+        const lines = content.split(/\r?\n/).map((line: string) => line.trim()).filter((line: string) => line !== '');
         totalLines += lines.length;
         for (const line of lines) {
             const count = lineCounts.get(line) || 0;
@@ -127,7 +126,7 @@ async function analyzeDuplication(files: string[]): Promise<{ duplicateLines: nu
     return { duplicateLines, totalLines, duplicationPercentage };
 }
 
-async function countDependencies(): Promise<number> {
+export async function countDependencies(): Promise<number> {
     try {
         const packageJsonContent = await fs.readFile('package.json', 'utf-8');
         const packageJson = JSON.parse(packageJsonContent);
@@ -140,7 +139,7 @@ async function countDependencies(): Promise<number> {
     }
 }
 
-async function runNpmAudit(): Promise<any> {
+export async function runNpmAudit(): Promise<any> {
     try {
         const { stdout } = await execPromise('npm audit --json');
         return JSON.parse(stdout);
@@ -150,7 +149,7 @@ async function runNpmAudit(): Promise<any> {
     }
 }
 
-async function analyzeLinting(base: string): Promise<{ totalErrors: number; totalWarnings: number; results: any[] }> {
+export async function analyzeLinting(base: string): Promise<{ totalErrors: number; totalWarnings: number; results: any[] }> {
     const eslint = new ESLint();
     const results = await eslint.lintFiles(base+"/**/*.{js,ts,tsx,jsx}");
 
@@ -164,7 +163,7 @@ async function analyzeLinting(base: string): Promise<{ totalErrors: number; tota
     return { totalErrors, totalWarnings, results };
 }
 
-async function measureStartupTime(command: string): Promise<number> {
+export async function measureStartupTime(command: string): Promise<number> {
     return new Promise<number>((resolve, reject) => {
         const startTime = Date.now();
         const child = spawn(command, [], { shell: true });
@@ -181,7 +180,7 @@ async function measureStartupTime(command: string): Promise<number> {
     });
 }
 
-async function measureBuildTime(): Promise<number> {
+export async function measureBuildTime(): Promise<number> {
     const startTime = Date.now();
     try {
         await execPromise('npm run build');
@@ -191,9 +190,9 @@ async function measureBuildTime(): Promise<number> {
     return Date.now() - startTime;
 }
 
-async function getFolderSize(folderPath: string): Promise<number> {
+export async function getFolderSize(folderPath: string): Promise<number> {
     const files = await fs.readdir(folderPath, { withFileTypes: true });
-    const sizes = await Promise.all(files.map(async (file) => {
+    const sizes = await Promise.all(files.map(async (file: any) => {
         const filePath = path.join(folderPath, file.name);
         if (file.isDirectory()) {
             return await getFolderSize(filePath);
@@ -203,10 +202,10 @@ async function getFolderSize(folderPath: string): Promise<number> {
         }
     })
     );
-    return sizes.reduce((sum, size) => sum + size, 0);
+    return sizes.reduce((sum: number, size: number) => sum + size, 0);
 }
 
-async function getLatestVersion(pkg: string) {
+export async function getLatestVersion(pkg: string) {
     return new Promise((resolve) => {
         exec(`npm view ${pkg} version`, (err, stdout) => {
             if (err) return resolve(null);
@@ -215,7 +214,7 @@ async function getLatestVersion(pkg: string) {
     });
 }
 
-async function analyzePackages() {
+export async function analyzePackages() {
     const nodeModulesPath = path.join(process.cwd(), 'node_modules');
     const packageJsonPath = path.join(process.cwd(), 'package.json');
 
@@ -259,7 +258,7 @@ async function analyzePackages() {
 }
 
 function startStep(text: string){
-    const spinner = yoctoSpinner({
+    return yoctoSpinner({
         text: text,
         color: "magenta",
         spinner: {
@@ -278,7 +277,6 @@ function startStep(text: string){
             ]
         }
     }).start();
-    return spinner;
 }
 
 export default async function analyzeProject(command: string | null): Promise<ProjectMetrics> {

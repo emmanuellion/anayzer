@@ -23,7 +23,7 @@ export default function Card({title, description, footer = "", content, data = [
     }, [content, data, value]);
 
     return (
-        <CardUi className={"rounded-xl bg-muted/50 "+className}>
+        <CardUi className={"rounded-xl bg-white dark:bg-black/50 dark:text-white "+className}>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
                 <CardDescription>{description}</CardDescription>

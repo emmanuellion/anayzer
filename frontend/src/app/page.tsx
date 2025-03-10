@@ -14,6 +14,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {Switch} from "@/components/ui/switch";
+import {Label} from "@/components/ui/label";
 
 interface ProjectMetrics {
     totalFiles: number;
@@ -41,9 +43,15 @@ export interface NumberData {
 export default function Page() {
     const [data, setData] = useState<null | ProjectMetrics>(null);
     const [infos, setInfos] = useState<NumberData[]>([]);
+    const [mode, setMode] = useState<number>(parseInt(localStorage.getItem("mode") || "") || 0);
 
     useEffect(() => {
         if(!data){
+            document.documentElement.classList.toggle(
+                "dark",
+                localStorage.theme === "dark" ||
+                (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches),
+            );
             fetch('http://localhost:2002/data')
                 .then(res => res.json()
                     .then(data => {
@@ -85,8 +93,16 @@ export default function Page() {
         }
     }, [data]);
 
+    useEffect(() => {
+
+    }, []);
+
   return (
-    <div className={"w-screen h-screen overflow-x-hidden bg-black/25 p-4"}>
+    <div className={"w-screen h-screen overflow-x-hidden bg-black/25 dark:bg-black/75 p-4"}>
+        <div className="flex items-center">
+            <Switch id="darkmode" />
+            <Label htmlFor="darkmode">Dark mode</Label>
+        </div>
         {
             data ? (
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
